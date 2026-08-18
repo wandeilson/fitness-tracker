@@ -3,68 +3,98 @@
 Objetivo: aumentar robustez do backend com cobertura alta e foco em regras criticas (auth, perfil e metas).
 
 ## Metas de cobertura
-- [ ] Linha geral >= 50% (marco inicial)
-- [ ] Linha geral >= 70% (marco intermediario)
-- [ ] Linha geral >= 80% (meta final)
-- [ ] Branch geral >= 60%
+- [x] Linha geral >= 80% (padrao oficial)
+- [x] Branch geral >= 70% (padrao oficial)
 - [ ] Pacotes criticos (`auth`, `goal`, `profile`) >= 85%
 
+## Metas da proxima execucao de testes
+- [x] Linha geral >= 80%
+- [x] Branch geral >= 70%
+- [x] Ajustar gate JaCoCo para Linha >= 80% e Branch >= 70%
+
 ## Fase 1 - Fundacao de testes
-- [ ] Configurar JaCoCo no `pom.xml` com relatorio em `verify`
-- [ ] Definir thresholds minimos de cobertura no build
+- [x] Configurar JaCoCo no `pom.xml` com relatorio em `verify`
+- [x] Definir thresholds minimos de cobertura no build
 - [ ] Padronizar estrutura de testes por modulo (`auth`, `goal`, `profile`)
 - [ ] Criar builders/factories de teste para `User` e `Goal`
 - [ ] Separar nomenclatura de testes unitarios e de integracao
 
 Criterio de aceite:
-- [ ] `mvn -f backend/pom.xml test` executa sem falhas
-- [ ] `mvn -f backend/pom.xml verify` gera relatorio JaCoCo
+- [x] `mvn -f backend/pom.xml test` executa sem falhas
+- [x] `mvn -f backend/pom.xml verify` gera relatorio JaCoCo
 
 ## Fase 2 - Testes unitarios de regra de negocio
 
 ### GoalService
-- [ ] Deve aplicar distribuicao padrao 50/25/25 quando nao houver personalizacao
-- [ ] Deve aceitar distribuicao customizada quando soma = 100
-- [ ] Deve rejeitar distribuicao customizada quando soma != 100
-- [ ] Deve calcular kcal por macro com base na meta calorica
-- [ ] Deve calcular gramas com regra 4/4/9
+- [x] Deve aplicar distribuicao padrao 50/25/25 quando nao houver personalizacao
+- [x] Deve aceitar distribuicao customizada quando soma = 100
+- [x] Deve rejeitar distribuicao customizada quando soma != 100
+- [x] Deve calcular kcal por macro com base na meta calorica
+- [x] Deve calcular gramas com regra 4/4/9
 - [ ] Deve arredondar valores conforme padrao definido
 
 ### ProfileService
-- [ ] Deve atualizar nome quando valor valido for informado
-- [ ] Deve atualizar sexo com enum valido
-- [ ] Deve atualizar nivel de atividade com enum valido
-- [ ] Deve manter comportamento esperado com campos nulos opcionais
+- [x] Deve atualizar nome quando valor valido for informado
+- [x] Deve atualizar sexo com enum valido
+- [x] Deve atualizar nivel de atividade com enum valido
+- [x] Deve manter comportamento esperado com campos nulos opcionais
 
 ### Auth/JWT (servicos)
-- [ ] Deve gerar token valido para usuario autenticado
-- [ ] Deve rejeitar credenciais invalidas
-- [ ] Deve tratar token expirado sem erro 500
-- [ ] Deve tratar token malformado sem erro 500
+- [x] Deve gerar token valido para usuario autenticado
+- [x] Deve rejeitar credenciais invalidas
+- [x] Deve tratar token expirado sem erro 500
+- [x] Deve tratar token malformado sem erro 500
+
+### AuthServiceTest (novo)
+- [x] Registro com email novo deve retornar sucesso
+- [x] Registro com email existente deve retornar erro
+- [x] Login com credenciais validas deve retornar token
+- [x] Login com credenciais invalidas deve retornar erro esperado
+
+### JwtServiceTest (novo)
+- [x] Deve gerar token com subject correto
+- [x] Deve extrair username do token valido
+- [x] Deve identificar token expirado
+- [x] Deve tratar token malformado/invalido
 
 Criterio de aceite:
-- [ ] Suite unitaria executa em tempo rapido
-- [ ] Regras criticas de metas cobertas por testes de sucesso e erro
+- [x] Suite unitaria executa em tempo rapido
+- [x] Regras criticas de metas cobertas por testes de sucesso e erro
 
 ## Fase 3 - Testes de API (Controller)
 
 ### ProfileController
-- [ ] `GET /api/profile` retorna 200 para usuario autenticado
-- [ ] `PUT /api/profile` atualiza dados validos e retorna 200
+- [x] `GET /api/profile` retorna 200 para usuario autenticado
+- [x] `PUT /api/profile` atualiza dados validos e retorna 200
 - [ ] Payload com enum invalido retorna 400 com mensagem amigavel
 
 ### GoalController
-- [ ] `GET /api/goals` retorna meta atual
-- [ ] `PUT /api/goals` com valores validos retorna 200
-- [ ] `PUT /api/goals` com soma de percentuais invalida retorna 400
+- [x] `GET /api/goals` retorna meta atual
+- [x] `PUT /api/goals` com valores validos retorna 200
+- [x] `PUT /api/goals` com soma de percentuais invalida retorna 400
 
 ### AuthController
-- [ ] `POST /api/auth/register` com dados validos retorna sucesso
-- [ ] `POST /api/auth/login` com credenciais validas retorna token
-- [ ] `POST /api/auth/login` com credenciais invalidas retorna 401
+- [x] `POST /api/auth/register` com dados validos retorna sucesso
+- [x] `POST /api/auth/login` com credenciais validas retorna token
+- [x] `POST /api/auth/login` com credenciais invalidas retorna 401
+
+### AuthControllerTest (novo)
+- [x] `POST /api/auth/register` valido retorna status de sucesso
+- [x] `POST /api/auth/register` invalido retorna 400
+- [x] `POST /api/auth/login` valido retorna token no body
+- [x] `POST /api/auth/login` invalido retorna 401
+
+### JwtAuthenticationFilterTest (novo)
+- [x] Requisicao sem Authorization deve seguir sem autenticar
+- [x] Token invalido nao deve autenticar usuario
+- [x] Token valido deve autenticar e seguir cadeia
+
+### Complementos de controller (validacao)
+- [x] ProfileController: payload com enum invalido retorna 400 com mensagem amigavel
+- [x] GoalController: payload invalido por Bean Validation retorna 400
 
 Criterio de aceite:
-- [ ] Status HTTP e mensagens de erro alinhados ao contrato atual da API
+- [x] Status HTTP e mensagens de erro alinhados ao contrato atual da API
 
 ## Fase 4 - Integracao com banco (PostgreSQL)
 - [ ] Subir testes com Testcontainers PostgreSQL
@@ -82,14 +112,21 @@ Criterio de aceite:
 - [ ] Revisar thresholds de cobertura a cada fase entregue
 
 ## Comandos de validacao
-- [ ] `mvn -f backend/pom.xml test`
-- [ ] `mvn -f backend/pom.xml verify`
+- [x] `mvn -f backend/pom.xml test`
+- [x] `mvn -f backend/pom.xml verify`
 - [ ] `mvn -f backend/pom.xml -Dtest=*Goal* test`
 - [ ] `mvn -f backend/pom.xml -Dtest=*Profile* test`
 
 ## Ordem recomendada de implementacao (curto prazo)
-- [ ] 1) Cobrir `GoalService`
-- [ ] 2) Cobrir `ProfileService`
+- [x] 1) Cobrir `GoalService`
+- [x] 2) Cobrir `ProfileService`
 - [ ] 3) Cobrir `Auth`/JWT
-- [ ] 4) Cobrir controllers de `profile` e `goals`
+- [x] 4) Cobrir controllers de `profile` e `goals`
 - [ ] 5) Adicionar Testcontainers + testes de integracao
+
+## Proxima onda de implementacao (planejada)
+- [x] 1) Criar `AuthServiceTest`
+- [x] 2) Criar `JwtServiceTest`
+- [x] 3) Criar `AuthControllerTest`
+- [x] 4) Criar `JwtAuthenticationFilterTest`
+- [x] 5) Completar validacoes pendentes de `ProfileController` e `GoalController`
