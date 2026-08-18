@@ -2,6 +2,8 @@ package com.fitness.backend.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,11 +37,13 @@ public class User {
     @Column(name = "height_cm")
     private Integer heightCm;
 
+    @Enumerated(EnumType.STRING)
     @Column
-    private String sex;
+    private Sex sex;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "activity_level")
-    private String activityLevel;
+    private ActivityLevel activityLevel;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
@@ -101,19 +105,19 @@ public class User {
         this.heightCm = heightCm;
     }
 
-    public String getSex() {
+    public Sex getSex() {
         return sex;
     }
 
-    public void setSex(String sex) {
+    public void setSex(Sex sex) {
         this.sex = sex;
     }
 
-    public String getActivityLevel() {
+    public ActivityLevel getActivityLevel() {
         return activityLevel;
     }
 
-    public void setActivityLevel(String activityLevel) {
+    public void setActivityLevel(ActivityLevel activityLevel) {
         this.activityLevel = activityLevel;
     }
 }

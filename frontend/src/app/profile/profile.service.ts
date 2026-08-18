@@ -2,13 +2,22 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
+export type Sex = 'MALE' | 'FEMALE';
+
+export type ActivityLevel =
+  | 'SEDENTARY'
+  | 'LIGHTLY_ACTIVE'
+  | 'MODERATELY_ACTIVE'
+  | 'VERY_ACTIVE'
+  | 'ATHLETE';
+
 export interface ProfilePayload {
   fullName: string | null;
   age: number | null;
   weightKg: number | null;
   heightCm: number | null;
-  sex: string | null;
-  activityLevel: string | null;
+  sex: Sex | null;
+  activityLevel: ActivityLevel | null;
 }
 
 export interface ProfileResponse extends ProfilePayload {

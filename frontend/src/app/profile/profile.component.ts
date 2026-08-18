@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ProfileService } from './profile.service';
+import { ActivityLevel, ProfileService, Sex } from './profile.service';
 
 @Component({
   selector: 'app-profile',
@@ -21,8 +21,20 @@ import { ProfileService } from './profile.service';
           <label>Idade <input type="number" formControlName="age" /></label>
           <label>Peso (kg) <input type="number" step="0.1" formControlName="weightKg" /></label>
           <label>Altura (cm) <input type="number" formControlName="heightCm" /></label>
-          <label>Sexo <input type="text" formControlName="sex" placeholder="ex: masculino/feminino" /></label>
-          <label>Nível de atividade <input type="text" formControlName="activityLevel" placeholder="ex: leve/moderado" /></label>
+          <label>
+            Sexo
+            <select formControlName="sex">
+              <option [ngValue]="null">Selecione</option>
+              <option *ngFor="let option of sexOptions" [value]="option.value">{{ option.label }}</option>
+            </select>
+          </label>
+          <label>
+            Nível de atividade
+            <select formControlName="activityLevel">
+              <option [ngValue]="null">Selecione</option>
+              <option *ngFor="let option of activityLevelOptions" [value]="option.value">{{ option.label }}</option>
+            </select>
+          </label>
 
           <button type="submit" [disabled]="form.invalid || loading()">
             {{ loading() ? 'Salvando...' : 'Salvar perfil' }}
@@ -40,7 +52,7 @@ import { ProfileService } from './profile.service';
     .card { background: #fff; border-radius: 14px; padding: 1.2rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08); max-width: 520px; }
     form { display: grid; gap: .8rem; }
     label { display: grid; gap: .4rem; color: #334e68; font-weight: 600; }
-    input { border: 1px solid #bcccdc; border-radius: 10px; padding: .65rem .75rem; }
+    input, select { border: 1px solid #bcccdc; border-radius: 10px; padding: .65rem .75rem; background: #fff; }
     button { margin-top: .6rem; background: #0f766e; color: #fff; border: 0; border-radius: 10px; padding: .7rem; font-weight: 600; }
     .ok { color: #067647; margin-top: .75rem; }
     .error { color: #b42318; margin-top: .75rem; }
@@ -54,13 +66,26 @@ export class ProfileComponent implements OnInit {
   protected readonly error = signal('');
   protected readonly success = signal(false);
 
+  protected readonly sexOptions: ReadonlyArray<{ value: Sex; label: string }> = [
+    { value: 'MALE', label: 'Masculino' },
+    { value: 'FEMALE', label: 'Feminino' }
+  ];
+
+  protected readonly activityLevelOptions: ReadonlyArray<{ value: ActivityLevel; label: string }> = [
+    { value: 'SEDENTARY', label: 'Sedentario' },
+    { value: 'LIGHTLY_ACTIVE', label: 'Levemente ativo' },
+    { value: 'MODERATELY_ACTIVE', label: 'Moderadamente ativo' },
+    { value: 'VERY_ACTIVE', label: 'Muito ativo' },
+    { value: 'ATHLETE', label: 'Atleta' }
+  ];
+
   protected readonly form = this.fb.group({
     fullName: ['', [Validators.required, Validators.maxLength(255)]],
     age: [null as number | null],
     weightKg: [null as number | null],
     heightCm: [null as number | null],
-    sex: [null as string | null],
-    activityLevel: [null as string | null]
+    sex: [null as Sex | null],
+    activityLevel: [null as ActivityLevel | null]
   });
 
   ngOnInit(): void {
@@ -85,7 +110,10 @@ export class ProfileComponent implements OnInit {
         this.form.patchValue(profile);
         this.success.set(true);
       },
-      error: (err) => this.error.set(err?.error?.message ?? 'Falha ao salvar perfil'),
+      error: (err) => {
+        this.error.set(err?.error?.message ?? 'Falha ao salvar perfil');
+        this.loading.set(false);
+      },
       complete: () => this.loading.set(false)
     });
   }

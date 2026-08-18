@@ -1,5 +1,7 @@
 package com.fitness.backend.profile.dto;
 
+import com.fitness.backend.user.ActivityLevel;
+import com.fitness.backend.user.Sex;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
@@ -8,7 +10,7 @@ public record ProfileRequest(
     @Positive Integer age,
     @Positive Double weightKg,
     @Positive Integer heightCm,
-    @Size(max = 20) String sex,
-    @Size(max = 50) String activityLevel
+    Sex sex,
+    ActivityLevel activityLevel
 ) {
 }
