@@ -10,9 +10,10 @@ import { GoalPayload, GoalResponse, GoalsService } from './goals.service';
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
     <main class="page">
+      <div class="layout">
       <header>
         <h1>Metas diárias</h1>
-        <a routerLink="/">Voltar</a>
+        <a class="back-btn" routerLink="/">Voltar</a>
       </header>
 
       <section class="card">
@@ -53,12 +54,22 @@ import { GoalPayload, GoalResponse, GoalsService } from './goals.service';
         <p class="ok" *ngIf="success()">Metas salvas com sucesso.</p>
         <p class="error" *ngIf="error()">{{ error() }}</p>
       </section>
+      </div>
     </main>
   `,
   styles: `
-    .page { min-height: 100vh; background: #f7fafc; padding: 2rem; }
+    .page { min-height: 100vh; background: #f7fafc; padding: 2rem 1rem; display: flex; align-items: center; justify-content: center; }
+    .layout { width: min(100%, 560px); }
     header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-    .card { background: #fff; border-radius: 14px; padding: 1.2rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08); max-width: 520px; }
+    .back-btn {
+      text-decoration: none;
+      background: #334e68;
+      color: #fff;
+      border-radius: 10px;
+      padding: .5rem .8rem;
+      font-weight: 700;
+    }
+    .card { background: #fff; border-radius: 14px; padding: 1.2rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
     form { display: grid; gap: .8rem; }
     label { display: grid; gap: .4rem; color: #334e68; font-weight: 600; }
     input { border: 1px solid #bcccdc; border-radius: 10px; padding: .65rem .75rem; }
@@ -73,6 +84,9 @@ import { GoalPayload, GoalResponse, GoalsService } from './goals.service';
     button { margin-top: .6rem; background: #0f766e; color: #fff; border: 0; border-radius: 10px; padding: .7rem; font-weight: 600; }
     .ok { color: #067647; margin-top: .75rem; }
     .error { color: #b42318; margin-top: .75rem; }
+    @media (max-width: 640px) {
+      .page { padding: 1rem .8rem; align-items: flex-start; }
+    }
   `
 })
 export class GoalsComponent implements OnInit {
