@@ -26,6 +26,21 @@ public class User {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
+    @Column
+    private Integer age;
+
+    @Column(name = "weight_kg")
+    private Double weightKg;
+
+    @Column(name = "height_cm")
+    private Integer heightCm;
+
+    @Column
+    private String sex;
+
+    @Column(name = "activity_level")
+    private String activityLevel;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -60,5 +75,45 @@ public class User {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public Double getWeightKg() {
+        return weightKg;
+    }
+
+    public void setWeightKg(Double weightKg) {
+        this.weightKg = weightKg;
+    }
+
+    public Integer getHeightCm() {
+        return heightCm;
+    }
+
+    public void setHeightCm(Integer heightCm) {
+        this.heightCm = heightCm;
+    }
+
+    public String getSex() {
+        return sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
+    }
+
+    public String getActivityLevel() {
+        return activityLevel;
+    }
+
+    public void setActivityLevel(String activityLevel) {
+        this.activityLevel = activityLevel;
     }
 }
