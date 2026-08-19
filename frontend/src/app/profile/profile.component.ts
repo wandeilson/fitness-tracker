@@ -1,74 +1,167 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { ActivityLevel, ProfileService, Sex } from './profile.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <main class="page">
-      <div class="layout">
-      <header>
+    <div class="profile-page">
+      <div class="page-header">
         <h1>Perfil</h1>
-        <a class="back-btn" routerLink="/">Voltar</a>
-      </header>
+        <p>Gerencie seus dados pessoais e nivel de atividade.</p>
+      </div>
 
-      <section class="card">
+      <div class="card">
         <form [formGroup]="form" (ngSubmit)="save()">
-          <label>Nome completo <input type="text" formControlName="fullName" /></label>
-          <label>Idade <input type="number" formControlName="age" /></label>
-          <label>Peso (kg) <input type="number" step="0.1" formControlName="weightKg" /></label>
-          <label>Altura (cm) <input type="number" formControlName="heightCm" /></label>
-          <label>
-            Sexo
-            <select formControlName="sex">
-              <option [ngValue]="null">Selecione</option>
-              <option *ngFor="let option of sexOptions" [value]="option.value">{{ option.label }}</option>
-            </select>
-          </label>
-          <label>
-            Nível de atividade
-            <select formControlName="activityLevel">
-              <option [ngValue]="null">Selecione</option>
-              <option *ngFor="let option of activityLevelOptions" [value]="option.value">{{ option.label }}</option>
-            </select>
-          </label>
+          <div class="field">
+            <label class="label-text">Nome completo</label>
+            <input type="text" formControlName="fullName" />
+          </div>
 
-          <button type="submit" [disabled]="form.invalid || loading()">
+          <div class="field-row">
+            <div class="field">
+              <label class="label-text">Idade</label>
+              <input type="number" formControlName="age" />
+            </div>
+            <div class="field">
+              <label class="label-text">Peso (kg)</label>
+              <input type="number" step="0.1" formControlName="weightKg" />
+            </div>
+            <div class="field">
+              <label class="label-text">Altura (cm)</label>
+              <input type="number" formControlName="heightCm" />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label class="label-text">Sexo</label>
+              <select formControlName="sex">
+                <option [ngValue]="null">Selecione</option>
+                @for (option of sexOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="field">
+              <label class="label-text">Nivel de atividade</label>
+              <select formControlName="activityLevel">
+                <option [ngValue]="null">Selecione</option>
+                @for (option of activityLevelOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
             {{ loading() ? 'Salvando...' : 'Salvar perfil' }}
           </button>
         </form>
 
-        <p class="ok" *ngIf="success()">Perfil salvo com sucesso.</p>
-        <p class="error" *ngIf="error()">{{ error() }}</p>
-      </section>
+        @if (success()) {
+          <div class="alert alert-success">Perfil salvo com sucesso.</div>
+        }
+        @if (error()) {
+          <div class="alert alert-error">{{ error() }}</div>
+        }
       </div>
-    </main>
+    </div>
   `,
   styles: `
-    .page { min-height: 100vh; background: #f7fafc; padding: 2rem 1rem; display: flex; align-items: center; justify-content: center; }
-    .layout { width: min(100%, 560px); }
-    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-    .back-btn {
-      text-decoration: none;
-      background: #334e68;
-      color: #fff;
-      border-radius: 10px;
-      padding: .5rem .8rem;
-      font-weight: 700;
+    .profile-page {
+      max-width: 560px;
     }
-    .card { background: #fff; border-radius: 14px; padding: 1.2rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-    form { display: grid; gap: .8rem; }
-    label { display: grid; gap: .4rem; color: #334e68; font-weight: 600; }
-    input, select { border: 1px solid #bcccdc; border-radius: 10px; padding: .65rem .75rem; background: #fff; }
-    button { margin-top: .6rem; background: #0f766e; color: #fff; border: 0; border-radius: 10px; padding: .7rem; font-weight: 600; }
-    .ok { color: #067647; margin-top: .75rem; }
-    .error { color: #b42318; margin-top: .75rem; }
+
+    .page-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .page-header h1 {
+      margin-bottom: 0.25rem;
+    }
+
+    .page-header p {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--color-surface);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+    }
+
+    form {
+      display: grid;
+      gap: 1.1rem;
+    }
+
+    .field {
+      display: grid;
+      gap: 0.4rem;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+    }
+
+    .label-text {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--color-text);
+    }
+
+    .btn-primary {
+      margin-top: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .alert {
+      margin-top: 1rem;
+      padding: 0.7rem 0.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .alert-success {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      border: 1px solid #a7f3d0;
+    }
+
+    .alert-error {
+      background: var(--color-error-bg);
+      color: var(--color-error);
+      border: 1px solid #fecaca;
+    }
+
     @media (max-width: 640px) {
-      .page { padding: 1rem .8rem; align-items: flex-start; }
+      .field-row {
+        grid-template-columns: 1fr;
+      }
     }
   `
 })

@@ -9,49 +9,197 @@ import { AuthService } from './auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
-    <main class="auth-page">
-      <section class="auth-card">
-        <h1>Criar conta</h1>
-        <p>Cadastre-se para começar a registrar refeições.</p>
+    <div class="auth-page">
+      <div class="auth-left">
+        <div class="auth-brand">
+          <span class="logo">FT</span>
+          <h1>Fitness Tracker</h1>
+          <p>Crie sua conta e comece a monitorar sua alimentacao hoje mesmo.</p>
+        </div>
+      </div>
 
-        <form [formGroup]="form" (ngSubmit)="submit()">
-          <label>
-            Nome completo
-            <input type="text" formControlName="fullName" placeholder="Seu nome" />
-          </label>
+      <div class="auth-right">
+        <section class="auth-card">
+          <h2>Criar conta</h2>
+          <p class="subtitle">Preencha os dados abaixo para se cadastrar.</p>
 
-          <label>
-            Email
-            <input type="email" formControlName="email" placeholder="voce@email.com" />
-          </label>
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <label>
+              <span class="label-text">Nome completo</span>
+              <input type="text" formControlName="fullName" placeholder="Seu nome" />
+            </label>
 
-          <label>
-            Senha
-            <input type="password" formControlName="password" placeholder="******" />
-          </label>
+            <label>
+              <span class="label-text">Email</span>
+              <input type="email" formControlName="email" placeholder="voce@email.com" />
+            </label>
 
-          <button type="submit" [disabled]="form.invalid || loading()">
-            {{ loading() ? 'Cadastrando...' : 'Cadastrar' }}
-          </button>
-        </form>
+            <label>
+              <span class="label-text">Senha</span>
+              <input type="password" formControlName="password" placeholder="Minimo 6 caracteres" />
+            </label>
 
-        <p class="error" *ngIf="error()">{{ error() }}</p>
-        <p class="helper">Já tem conta? <a routerLink="/login">Entrar</a></p>
-      </section>
-    </main>
+            <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
+              {{ loading() ? 'Cadastrando...' : 'Cadastrar' }}
+            </button>
+          </form>
+
+          @if (error()) {
+            <div class="alert alert-error">{{ error() }}</div>
+          }
+
+          <p class="auth-link">Ja tem conta? <a routerLink="/login">Entrar</a></p>
+        </section>
+      </div>
+    </div>
   `,
   styles: `
-    .auth-page { min-height: 100vh; display: grid; place-items: center; background: linear-gradient(145deg, #f0f4f8, #d9e2ec); padding: 1rem; }
-    .auth-card { width: min(420px, 100%); background: #fff; padding: 1.5rem; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-    h1 { margin: 0 0 .4rem; }
-    p { margin: 0 0 1rem; color: #486581; }
-    form { display: grid; gap: .9rem; }
-    label { display: grid; gap: .4rem; font-weight: 600; color: #334e68; }
-    input { border: 1px solid #bcccdc; border-radius: 10px; padding: .7rem .75rem; }
-    button { background: #0f766e; color: #fff; border: 0; border-radius: 10px; padding: .75rem; font-weight: 600; cursor: pointer; }
-    button[disabled] { opacity: .6; cursor: not-allowed; }
-    .error { color: #b42318; margin-top: .75rem; }
-    .helper { margin-top: .75rem; }
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .auth-left {
+      flex: 1;
+      background: linear-gradient(135deg, var(--color-sidebar) 0%, #0f172a 100%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+    }
+
+    .auth-brand {
+      max-width: 360px;
+    }
+
+    .auth-brand .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: var(--color-primary);
+      display: inline-grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-brand h1 {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .auth-brand p {
+      color: #94a3b8;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .auth-right {
+      width: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2.5rem;
+      background: var(--color-bg);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .auth-card h2 {
+      font-size: 1.6rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle {
+      color: var(--color-text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    form {
+      display: grid;
+      gap: 1.1rem;
+    }
+
+    label {
+      display: grid;
+      gap: 0.4rem;
+    }
+
+    .label-text {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--color-text);
+    }
+
+    .btn-primary {
+      margin-top: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .alert {
+      margin-top: 1rem;
+      padding: 0.7rem 0.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .alert-error {
+      background: var(--color-error-bg);
+      color: var(--color-error);
+      border: 1px solid #fecaca;
+    }
+
+    .auth-link {
+      margin-top: 1.5rem;
+      text-align: center;
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .auth-link a {
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .auth-page {
+        flex-direction: column;
+      }
+
+      .auth-left {
+        padding: 2rem 1.5rem;
+        min-height: auto;
+      }
+
+      .auth-brand h1 {
+        font-size: 1.5rem;
+      }
+
+      .auth-right {
+        width: 100%;
+        padding: 2rem 1.5rem;
+      }
+    }
   `
 })
 export class RegisterComponent {

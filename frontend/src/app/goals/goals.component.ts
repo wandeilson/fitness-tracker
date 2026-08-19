@@ -1,91 +1,266 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { GoalPayload, GoalResponse, GoalsService } from './goals.service';
 
 @Component({
   selector: 'app-goals',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <main class="page">
-      <div class="layout">
-      <header>
-        <h1>Metas diárias</h1>
-        <a class="back-btn" routerLink="/">Voltar</a>
-      </header>
+    <div class="goals-page">
+      <div class="page-header">
+        <h1>Metas diarias</h1>
+        <p>Defina suas calorias e a distribuicao de macronutrientes.</p>
+      </div>
 
-      <section class="card">
+      <div class="card">
         <form [formGroup]="form" (ngSubmit)="save()">
-          <label>Meta diária (kcal) <input type="number" formControlName="calories" (input)="recalculate()" /></label>
+          <div class="field">
+            <label class="label-text">Meta diaria (kcal)</label>
+            <input type="number" formControlName="calories" (input)="recalculate()" />
+          </div>
 
-          <label class="checkbox">
+          <label class="checkbox-field">
             <input type="checkbox" formControlName="customizeDistribution" (change)="onCustomizeChange()" />
-            Personalizar distribuição
+            <span>Personalizar distribuicao de macros</span>
           </label>
 
           <div class="percent-grid">
-            <label>Carboidratos (%) <input type="number" formControlName="carbsPercent" (input)="recalculate()" /></label>
-            <label>Proteínas (%) <input type="number" formControlName="proteinPercent" (input)="recalculate()" /></label>
-            <label>Gorduras (%) <input type="number" formControlName="fatPercent" (input)="recalculate()" /></label>
+            <div class="field">
+              <label class="label-text">Carboidratos (%)</label>
+              <input type="number" formControlName="carbsPercent" (input)="recalculate()" />
+            </div>
+            <div class="field">
+              <label class="label-text">Proteinas (%)</label>
+              <input type="number" formControlName="proteinPercent" (input)="recalculate()" />
+            </div>
+            <div class="field">
+              <label class="label-text">Gorduras (%)</label>
+              <input type="number" formControlName="fatPercent" (input)="recalculate()" />
+            </div>
           </div>
 
-          <p class="sum" *ngIf="form.value.customizeDistribution" [class.sum-ok]="sumPercent() === 100" [class.sum-warn]="sumPercent() !== 100">
-            Soma atual: {{ sumPercent() }}%
-          </p>
+          @if (form.value.customizeDistribution) {
+            <div class="sum-status" [class.ok]="sumPercent() === 100" [class.warn]="sumPercent() !== 100">
+              Soma atual: {{ sumPercent() }}%
+            </div>
+          }
 
-          <p class="error" *ngIf="form.value.customizeDistribution && sumPercent() !== 100">
-            A soma dos percentuais deve ser exatamente 100%.
-          </p>
+          @if (form.value.customizeDistribution && sumPercent() !== 100) {
+            <div class="alert alert-error">A soma dos percentuais deve ser exatamente 100%.</div>
+          }
 
-          <div class="result-grid">
-            <h3>Distribuição calculada</h3>
-            <p>Carboidratos: {{ macro.carbsPercent }}% | {{ macro.carbsCalories }} kcal | {{ macro.carbsG }} g</p>
-            <p>Proteínas: {{ macro.proteinPercent }}% | {{ macro.proteinCalories }} kcal | {{ macro.proteinG }} g</p>
-            <p>Gorduras: {{ macro.fatPercent }}% | {{ macro.fatCalories }} kcal | {{ macro.fatG }} g</p>
+          <div class="result-card">
+            <h3>Distribuicao calculada</h3>
+            <div class="result-grid">
+              <div class="result-item">
+                <span class="result-label carbs">Carboidratos</span>
+                <span class="result-value">{{ macro.carbsG }} g</span>
+                <span class="result-sub">{{ macro.carbsCalories }} kcal</span>
+              </div>
+              <div class="result-item">
+                <span class="result-label protein">Proteinas</span>
+                <span class="result-value">{{ macro.proteinG }} g</span>
+                <span class="result-sub">{{ macro.proteinCalories }} kcal</span>
+              </div>
+              <div class="result-item">
+                <span class="result-label fat">Gorduras</span>
+                <span class="result-value">{{ macro.fatG }} g</span>
+                <span class="result-sub">{{ macro.fatCalories }} kcal</span>
+              </div>
+            </div>
           </div>
 
-          <button type="submit" [disabled]="isSaveDisabled()">
+          <button type="submit" class="btn-primary" [disabled]="isSaveDisabled()">
             {{ loading() ? 'Salvando...' : 'Salvar metas' }}
           </button>
         </form>
 
-        <p class="ok" *ngIf="success()">Metas salvas com sucesso.</p>
-        <p class="error" *ngIf="error()">{{ error() }}</p>
-      </section>
+        @if (success()) {
+          <div class="alert alert-success">Metas salvas com sucesso.</div>
+        }
+        @if (error()) {
+          <div class="alert alert-error">{{ error() }}</div>
+        }
       </div>
-    </main>
+    </div>
   `,
   styles: `
-    .page { min-height: 100vh; background: #f7fafc; padding: 2rem 1rem; display: flex; align-items: center; justify-content: center; }
-    .layout { width: min(100%, 560px); }
-    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-    .back-btn {
-      text-decoration: none;
-      background: #334e68;
-      color: #fff;
-      border-radius: 10px;
-      padding: .5rem .8rem;
-      font-weight: 700;
+    .goals-page {
+      max-width: 560px;
     }
-    .card { background: #fff; border-radius: 14px; padding: 1.2rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-    form { display: grid; gap: .8rem; }
-    label { display: grid; gap: .4rem; color: #334e68; font-weight: 600; }
-    input { border: 1px solid #bcccdc; border-radius: 10px; padding: .65rem .75rem; }
-    .checkbox { grid-template-columns: 22px 1fr; align-items: center; font-weight: 500; }
-    .percent-grid { display: grid; grid-template-columns: 1fr; gap: .8rem; }
-    .sum { margin-top: .2rem; font-weight: 600; }
-    .sum-ok { color: #067647; }
-    .sum-warn { color: #b42318; }
-    .result-grid { background: #f0f4f8; border-radius: 10px; padding: .9rem; margin-top: .5rem; }
-    h3 { margin: 0 0 .5rem; color: #102a43; font-size: 1rem; }
-    p { margin: .2rem 0; color: #334e68; }
-    button { margin-top: .6rem; background: #0f766e; color: #fff; border: 0; border-radius: 10px; padding: .7rem; font-weight: 600; }
-    .ok { color: #067647; margin-top: .75rem; }
-    .error { color: #b42318; margin-top: .75rem; }
+
+    .page-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .page-header h1 {
+      margin-bottom: 0.25rem;
+    }
+
+    .page-header p {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--color-surface);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+    }
+
+    form {
+      display: grid;
+      gap: 1.1rem;
+    }
+
+    .field {
+      display: grid;
+      gap: 0.4rem;
+    }
+
+    .label-text {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--color-text);
+    }
+
+    .checkbox-field {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 500;
+      font-size: 0.92rem;
+      color: var(--color-text);
+      cursor: pointer;
+    }
+
+    .checkbox-field input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary);
+      cursor: pointer;
+    }
+
+    .percent-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+    }
+
+    .sum-status {
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .sum-status.ok {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+    }
+
+    .sum-status.warn {
+      background: var(--color-error-bg);
+      color: var(--color-error);
+    }
+
+    .result-card {
+      background: var(--color-bg);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1.1rem 1.25rem;
+    }
+
+    .result-card h3 {
+      margin-bottom: 0.75rem;
+      font-size: 0.92rem;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+
+    .result-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .result-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .result-label.carbs { color: #0891b2; }
+    .result-label.protein { color: #7c3aed; }
+    .result-label.fat { color: #d97706; }
+
+    .result-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    .result-sub {
+      font-size: 0.8rem;
+      color: var(--color-text-secondary);
+    }
+
+    .btn-primary {
+      margin-top: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .alert {
+      margin-top: 1rem;
+      padding: 0.7rem 0.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .alert-success {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      border: 1px solid #a7f3d0;
+    }
+
+    .alert-error {
+      background: var(--color-error-bg);
+      color: var(--color-error);
+      border: 1px solid #fecaca;
+    }
+
     @media (max-width: 640px) {
-      .page { padding: 1rem .8rem; align-items: flex-start; }
+      .percent-grid,
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
     }
   `
 })
