@@ -6,6 +6,7 @@ import { GoalsComponent } from './goals/goals.component';
 import { LoginComponent } from './auth/login.component';
 import { ProfileComponent } from './profile/profile.component';
 import { RegisterComponent } from './auth/register.component';
+import { DailyLogPageComponent } from './meals/daily-log-page.component';
 
 export const routes: Routes = [
 	{ path: 'login', component: LoginComponent },
@@ -16,6 +17,7 @@ export const routes: Routes = [
 		canActivate: [authGuard],
 		children: [
 			{ path: '', component: DashboardComponent },
+			{ path: 'daily', component: DailyLogPageComponent },
 			{ path: 'goals', component: GoalsComponent },
 			{ path: 'profile', component: ProfileComponent }
 		]

@@ -19,6 +19,10 @@ import { AuthService } from '../auth/auth.service';
             <span class="nav-icon">&#9632;</span>
             Dashboard
           </a>
+          <a routerLink="/daily" routerLinkActive="active">
+            <span class="nav-icon">&#9776;</span>
+            Diario
+          </a>
           <a routerLink="/goals" routerLinkActive="active">
             <span class="nav-icon">&#9654;</span>
             Metas
@@ -44,6 +48,7 @@ import { AuthService } from '../auth/auth.service';
         <div class="mobile-overlay" (click)="mobileOpen.set(false)"></div>
         <nav class="mobile-nav">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="mobileOpen.set(false)">Dashboard</a>
+          <a routerLink="/daily" routerLinkActive="active" (click)="mobileOpen.set(false)">Diario</a>
           <a routerLink="/goals" routerLinkActive="active" (click)="mobileOpen.set(false)">Metas</a>
           <a routerLink="/profile" routerLinkActive="active" (click)="mobileOpen.set(false)">Perfil</a>
         </nav>
