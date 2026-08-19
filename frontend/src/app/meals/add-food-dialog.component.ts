@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,6 +17,7 @@ export interface AddFoodDialogData {
   imports: [
     ReactiveFormsModule,
     MatDialogModule,
+    MatButtonModule,
     MatInputModule,
     MatFormFieldModule,
     MatIconModule,

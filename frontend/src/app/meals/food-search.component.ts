@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,6 +16,7 @@ import { FoodService } from '../foods/food.service';
   imports: [
     ReactiveFormsModule,
     MatDialogModule,
+    MatButtonModule,
     MatInputModule,
     MatFormFieldModule,
     MatIconModule,

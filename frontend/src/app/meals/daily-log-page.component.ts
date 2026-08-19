@@ -24,7 +24,7 @@ import { DailySummaryComponent } from './daily-summary.component';
   template: `
     <div class="daily-page">
       <div class="page-header">
-        <h1>Diario</h1>
+        <h1>Diário</h1>
         <div class="date-nav">
           <button class="nav-btn" (click)="prevDay()">
             <mat-icon>chevron_left</mat-icon>
@@ -163,16 +163,12 @@ export class DailyLogPageComponent implements OnInit {
   }
 
   protected prevDay(): void {
-    const current = new Date(this.dateControl.value);
-    current.setDate(current.getDate() - 1);
-    this.dateControl.setValue(this.formatDate(current), { emitEvent: false });
+    this.dateControl.setValue(this.shiftDate(this.dateControl.value, -1), { emitEvent: false });
     this.loadData();
   }
 
   protected nextDay(): void {
-    const current = new Date(this.dateControl.value);
-    current.setDate(current.getDate() + 1);
-    this.dateControl.setValue(this.formatDate(current), { emitEvent: false });
+    this.dateControl.setValue(this.shiftDate(this.dateControl.value, 1), { emitEvent: false });
     this.loadData();
   }
 
@@ -212,5 +208,11 @@ export class DailyLogPageComponent implements OnInit {
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
+  }
+
+  private shiftDate(isoDate: string, days: number): string {
+    const [y, m, d] = isoDate.split('-').map(Number);
+    const date = new Date(y, m - 1, d + days);
+    return this.formatDate(date);
   }
 }

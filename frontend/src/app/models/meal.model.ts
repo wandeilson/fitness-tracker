@@ -52,9 +52,9 @@ export interface DailySummaryResponse {
 }
 
 export const MEAL_TYPE_LABELS: Record<MealType, string> = {
-  [MealType.BREAKFAST]: 'Cafe da manha',
-  [MealType.MORNING_SNACK]: 'Lanche da manha',
-  [MealType.LUNCH]: 'Almoco',
+  [MealType.BREAKFAST]: 'Café da manhã',
+  [MealType.MORNING_SNACK]: 'Lanche da manhã',
+  [MealType.LUNCH]: 'Almoço',
   [MealType.AFTERNOON_SNACK]: 'Lanche da tarde',
   [MealType.DINNER]: 'Jantar',
   [MealType.SUPPER]: 'Ceia',
