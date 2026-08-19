@@ -15,6 +15,7 @@ import com.fitness.backend.goal.dto.GoalRequest;
 import com.fitness.backend.goal.dto.GoalResponse;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +32,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class GoalControllerTest {
 
     private MockMvc mockMvc;
-
     private ObjectMapper objectMapper;
 
     @Mock
@@ -51,7 +51,6 @@ class GoalControllerTest {
     @Test
     void getGoalShouldReturn200WhenAuthenticated() throws Exception {
         GoalResponse response = buildGoalResponse();
-
         when(goalService.getGoal("user@test.com")).thenReturn(response);
 
         mockMvc.perform(get("/api/goals").principal(authenticatedUser()))
@@ -59,7 +58,8 @@ class GoalControllerTest {
             .andExpect(jsonPath("$.calories").value(2000))
             .andExpect(jsonPath("$.carbsPercent").value(50.0))
             .andExpect(jsonPath("$.proteinPercent").value(25.0))
-            .andExpect(jsonPath("$.fatPercent").value(25.0));
+            .andExpect(jsonPath("$.fatPercent").value(25.0))
+            .andExpect(jsonPath("$.validFrom").value(LocalDate.now().toString()));
     }
 
     @Test
@@ -67,35 +67,29 @@ class GoalControllerTest {
         GoalRequest request = new GoalRequest(2000, 40.0, 30.0, 30.0);
         GoalResponse response = new GoalResponse(
             2000,
-            new BigDecimal("40.00"),
-            new BigDecimal("30.00"),
-            new BigDecimal("30.00"),
-            new BigDecimal("800.00"),
-            new BigDecimal("600.00"),
-            new BigDecimal("600.00"),
-            new BigDecimal("200.00"),
-            new BigDecimal("150.00"),
-            new BigDecimal("66.67"),
+            new BigDecimal("40.00"), new BigDecimal("30.00"), new BigDecimal("30.00"),
+            new BigDecimal("800.00"), new BigDecimal("600.00"), new BigDecimal("600.00"),
+            new BigDecimal("200.00"), new BigDecimal("150.00"), new BigDecimal("66.67"),
+            LocalDate.now(), null,
             Instant.parse("2026-08-18T12:00:00Z")
         );
-
         when(goalService.upsertGoal(eq("user@test.com"), any(GoalRequest.class))).thenReturn(response);
 
         mockMvc.perform(put("/api/goals")
-            .principal(authenticatedUser())
+                .principal(authenticatedUser())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.calories").value(2000))
             .andExpect(jsonPath("$.carbsPercent").value(40.0))
             .andExpect(jsonPath("$.proteinPercent").value(30.0))
-            .andExpect(jsonPath("$.fatPercent").value(30.0));
+            .andExpect(jsonPath("$.fatPercent").value(30.0))
+            .andExpect(jsonPath("$.validFrom").value(LocalDate.now().toString()));
     }
 
     @Test
     void upsertGoalShouldReturn400WhenServiceRejectsPayload() throws Exception {
         GoalRequest request = new GoalRequest(2000, 40.0, 30.0, 20.0);
-
         when(goalService.upsertGoal(eq("user@test.com"), any(GoalRequest.class)))
             .thenThrow(new IllegalArgumentException("Macro percentages must sum exactly to 100"));
 
@@ -111,10 +105,10 @@ class GoalControllerTest {
     void upsertGoalShouldReturn400WhenPayloadFailsBeanValidation() throws Exception {
         String invalidPayload = """
             {
-              \"calories\": 0,
-              \"carbsPercent\": 50.0,
-              \"proteinPercent\": 25.0,
-              \"fatPercent\": 25.0
+              "calories": 0,
+              "carbsPercent": 50.0,
+              "proteinPercent": 25.0,
+              "fatPercent": 25.0
             }
             """;
 
@@ -129,15 +123,10 @@ class GoalControllerTest {
     private GoalResponse buildGoalResponse() {
         return new GoalResponse(
             2000,
-            new BigDecimal("50.00"),
-            new BigDecimal("25.00"),
-            new BigDecimal("25.00"),
-            new BigDecimal("1000.00"),
-            new BigDecimal("500.00"),
-            new BigDecimal("500.00"),
-            new BigDecimal("250.00"),
-            new BigDecimal("125.00"),
-            new BigDecimal("55.56"),
+            new BigDecimal("50.00"), new BigDecimal("25.00"), new BigDecimal("25.00"),
+            new BigDecimal("1000.00"), new BigDecimal("500.00"), new BigDecimal("500.00"),
+            new BigDecimal("250.00"), new BigDecimal("125.00"), new BigDecimal("55.56"),
+            LocalDate.now(), null,
             Instant.parse("2026-08-18T12:00:00Z")
         );
     }

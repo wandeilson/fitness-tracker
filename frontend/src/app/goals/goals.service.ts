@@ -16,6 +16,8 @@ export interface GoalResponse extends GoalPayload {
   carbsG: number;
   proteinG: number;
   fatG: number;
+  validFrom: string;
+  validUntil: string | null;
   updatedAt: string;
 }
 

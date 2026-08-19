@@ -7,7 +7,6 @@ import {
   MealType,
   MEAL_TYPE_ORDER,
 } from '../models/meal.model';
-import { GoalResponse, GoalsService } from '../goals/goals.service';
 import { MealService } from './meal.service';
 import { MealSectionComponent } from './meal-section.component';
 import { DailySummaryComponent } from './daily-summary.component';
@@ -43,8 +42,8 @@ import { DailySummaryComponent } from './daily-summary.component';
         </div>
       </div>
 
-      @if (summary() && goal()) {
-        <app-daily-summary [summary]="summary()!" [goal]="goal()!" />
+      @if (summary()) {
+        <app-daily-summary [summary]="summary()!" />
       }
 
       <div class="sections">
@@ -142,23 +141,16 @@ import { DailySummaryComponent } from './daily-summary.component';
 })
 export class DailyLogPageComponent implements OnInit {
   private readonly mealService = inject(MealService);
-  private readonly goalsService = inject(GoalsService);
 
   protected readonly dateControl = new FormControl(this.formatDate(new Date()), {
     nonNullable: true,
   });
   protected readonly meals = signal<MealResponse[]>([]);
   protected readonly summary = signal<DailySummaryResponse | null>(null);
-  protected readonly goal = signal<GoalResponse | null>(null);
   protected readonly mealTypes = MEAL_TYPE_ORDER;
 
   ngOnInit(): void {
     this.loadData();
-    this.goalsService.getGoal().subscribe({
-      next: (g) => this.goal.set(g),
-      error: () => {},
-    });
-
     this.dateControl.valueChanges.subscribe(() => this.loadData());
   }
 

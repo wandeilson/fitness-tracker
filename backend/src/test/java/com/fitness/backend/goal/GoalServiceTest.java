@@ -1,8 +1,11 @@
 package com.fitness.backend.goal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fitness.backend.goal.dto.GoalRequest;
@@ -10,6 +13,8 @@ import com.fitness.backend.goal.dto.GoalResponse;
 import com.fitness.backend.user.User;
 import com.fitness.backend.user.UserRepository;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,11 +50,14 @@ class GoalServiceTest {
 
     @Test
     void upsertGoalShouldApplyDefaultDistributionWhenPercentagesAreNull() {
-        when(goalRepository.findByUserId(1L)).thenReturn(Optional.empty());
+        when(goalRepository.findCurrentByUserId(1L)).thenReturn(Optional.empty());
+        when(goalRepository.findActiveByUserIdAndDate(1L, LocalDate.now())).thenReturn(Optional.empty());
         when(goalRepository.save(any(Goal.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         GoalResponse response = goalService.upsertGoal("user@test.com", new GoalRequest(2000, null, null, null));
 
+        assertEquals(LocalDate.now(), response.validFrom());
+        assertEquals(null, response.validUntil());
         assertBigDecimalEquals("50", response.carbsPercent());
         assertBigDecimalEquals("25", response.proteinPercent());
         assertBigDecimalEquals("25", response.fatPercent());
@@ -63,11 +71,13 @@ class GoalServiceTest {
 
     @Test
     void upsertGoalShouldApplyCustomDistributionWhenPercentagesSumTo100() {
-        when(goalRepository.findByUserId(1L)).thenReturn(Optional.empty());
+        when(goalRepository.findCurrentByUserId(1L)).thenReturn(Optional.empty());
+        when(goalRepository.findActiveByUserIdAndDate(1L, LocalDate.now())).thenReturn(Optional.empty());
         when(goalRepository.save(any(Goal.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         GoalResponse response = goalService.upsertGoal("user@test.com", new GoalRequest(2000, 40.0, 30.0, 30.0));
 
+        assertEquals(LocalDate.now(), response.validFrom());
         assertBigDecimalEquals("40.00", response.carbsPercent());
         assertBigDecimalEquals("30.00", response.proteinPercent());
         assertBigDecimalEquals("30.00", response.fatPercent());
@@ -77,6 +87,31 @@ class GoalServiceTest {
         assertBigDecimalEquals("200.00", response.carbsG());
         assertBigDecimalEquals("150.00", response.proteinG());
         assertBigDecimalEquals("66.67", response.fatG());
+    }
+
+    @Test
+    void upsertGoalShouldClosePreviousGoalWhenItStartedBeforeToday() {
+        Goal previousGoal = buildGoal(1L, LocalDate.now().minusDays(10), null);
+        when(goalRepository.findCurrentByUserId(1L)).thenReturn(Optional.of(previousGoal));
+        when(goalRepository.findActiveByUserIdAndDate(1L, LocalDate.now())).thenReturn(Optional.empty());
+        when(goalRepository.save(any(Goal.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        goalService.upsertGoal("user@test.com", new GoalRequest(2500, null, null, null));
+
+        assertEquals(LocalDate.now().minusDays(1), previousGoal.getValidUntil());
+        verify(goalRepository).save(previousGoal);
+    }
+
+    @Test
+    void upsertGoalShouldNotCloseGoalThatStartsToday() {
+        Goal todayGoal = buildGoal(1L, LocalDate.now(), null);
+        when(goalRepository.findCurrentByUserId(1L)).thenReturn(Optional.of(todayGoal));
+        when(goalRepository.findActiveByUserIdAndDate(1L, LocalDate.now())).thenReturn(Optional.of(todayGoal));
+        when(goalRepository.save(any(Goal.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        goalService.upsertGoal("user@test.com", new GoalRequest(1800, null, null, null));
+
+        assertEquals(null, todayGoal.getValidUntil());
     }
 
     @Test
@@ -100,8 +135,30 @@ class GoalServiceTest {
     }
 
     @Test
-    void getGoalShouldThrowWhenGoalDoesNotExist() {
-        when(goalRepository.findByUserId(1L)).thenReturn(Optional.empty());
+    void getGoalShouldReturnCurrentGoal() {
+        Goal current = buildGoal(1L, LocalDate.now().minusDays(5), null);
+        when(goalRepository.findCurrentByUserId(1L)).thenReturn(Optional.of(current));
+
+        GoalResponse response = goalService.getGoal("user@test.com");
+
+        assertEquals(2000, response.calories());
+    }
+
+    @Test
+    void getGoalShouldFallbackToMostRecentClosedGoal() {
+        Goal closed = buildGoal(1L, LocalDate.now().minusDays(10), LocalDate.now().minusDays(1));
+        when(goalRepository.findCurrentByUserId(1L)).thenReturn(Optional.empty());
+        when(goalRepository.findMostRecentClosedByUserId(1L)).thenReturn(Optional.of(closed));
+
+        GoalResponse response = goalService.getGoal("user@test.com");
+
+        assertEquals(2000, response.calories());
+    }
+
+    @Test
+    void getGoalShouldThrowWhenNoGoalExists() {
+        when(goalRepository.findCurrentByUserId(1L)).thenReturn(Optional.empty());
+        when(goalRepository.findMostRecentClosedByUserId(1L)).thenReturn(Optional.empty());
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
@@ -109,6 +166,40 @@ class GoalServiceTest {
         );
 
         assertEquals("Goal not found", ex.getMessage());
+    }
+
+    @Test
+    void getGoalForDateShouldReturnGoalForSpecificDate() {
+        Goal pastGoal = buildGoal(1L, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 6, 30));
+        pastGoal.setCalories(1500);
+        when(goalRepository.findActiveByUserIdAndDate(1L, LocalDate.of(2026, 3, 15)))
+            .thenReturn(Optional.of(pastGoal));
+
+        Optional<GoalResponse> result = goalService.getGoalForDate("user@test.com", LocalDate.of(2026, 3, 15));
+
+        assertNotNull(result);
+        assertEquals(1500, result.get().calories());
+    }
+
+    private Goal buildGoal(Long id, LocalDate validFrom, LocalDate validUntil) {
+        Goal goal = new Goal();
+        ReflectionTestUtils.setField(goal, "id", id);
+        goal.setUser(user);
+        goal.setValidFrom(validFrom);
+        goal.setValidUntil(validUntil);
+        goal.setCalories(2000);
+        goal.setCarbsPercent(new BigDecimal("50.00"));
+        goal.setProteinPercent(new BigDecimal("25.00"));
+        goal.setFatPercent(new BigDecimal("25.00"));
+        goal.setCarbsCalories(new BigDecimal("1000.00"));
+        goal.setProteinCalories(new BigDecimal("500.00"));
+        goal.setFatCalories(new BigDecimal("500.00"));
+        goal.setCarbsG(new BigDecimal("250.00"));
+        goal.setProteinG(new BigDecimal("125.00"));
+        goal.setFatG(new BigDecimal("55.56"));
+        goal.setCreatedAt(Instant.now());
+        goal.setUpdatedAt(Instant.now());
+        return goal;
     }
 
     private void assertBigDecimalEquals(String expected, BigDecimal actual) {

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fitness.backend.auth.ApiExceptionHandler;
 import com.fitness.backend.meal.dto.DailySummaryResponse;
+import com.fitness.backend.meal.dto.GoalSummary;
 import com.fitness.backend.meal.dto.MealCreateRequest;
 import com.fitness.backend.meal.dto.MealItemRequest;
 import com.fitness.backend.meal.dto.MealItemResponse;
@@ -130,7 +131,8 @@ class MealControllerTest {
                 new BigDecimal("650.00"),
                 new BigDecimal("80.00"),
                 new BigDecimal("25.00"),
-                new BigDecimal("15.00")
+                new BigDecimal("15.00"),
+                new GoalSummary(2000, new BigDecimal("250.00"), new BigDecimal("125.00"), new BigDecimal("55.56"))
             )
         );
 

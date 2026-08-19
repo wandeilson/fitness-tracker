@@ -8,6 +8,7 @@ public record DailySummaryResponse(
     BigDecimal kcalTotal,
     BigDecimal carbsTotal,
     BigDecimal proteinTotal,
-    BigDecimal fatTotal
+    BigDecimal fatTotal,
+    GoalSummary goal
 ) {
 }

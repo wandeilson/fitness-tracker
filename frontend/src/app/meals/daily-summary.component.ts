@@ -1,6 +1,5 @@
 import { Component, input } from '@angular/core';
-import { DailySummaryResponse } from '../models/meal.model';
-import { GoalResponse } from '../goals/goals.service';
+import { DailySummaryResponse, GoalSummary } from '../models/meal.model';
 
 interface MacroBar {
   label: string;
@@ -106,11 +105,18 @@ interface MacroBar {
 })
 export class DailySummaryComponent {
   summary = input.required<DailySummaryResponse>();
-  goal = input.required<GoalResponse>();
 
   bars = (): MacroBar[] => {
     const s = this.summary();
-    const g = this.goal();
+    const g = s.goal;
+    if (!g) {
+      return [
+        { label: 'Calorias', consumed: s.kcalTotal, goal: 0, unit: 'kcal', color: '#0d9488' },
+        { label: 'Carboidratos', consumed: s.carbsTotal, goal: 0, unit: 'g', color: '#0891b2' },
+        { label: 'Proteinas', consumed: s.proteinTotal, goal: 0, unit: 'g', color: '#7c3aed' },
+        { label: 'Gorduras', consumed: s.fatTotal, goal: 0, unit: 'g', color: '#d97706' },
+      ];
+    }
     return [
       { label: 'Calorias', consumed: s.kcalTotal, goal: g.calories, unit: 'kcal', color: '#0d9488' },
       { label: 'Carboidratos', consumed: s.carbsTotal, goal: g.carbsG, unit: 'g', color: '#0891b2' },

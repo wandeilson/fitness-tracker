@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.fitness.backend.food.Food;
 import com.fitness.backend.food.FoodRepository;
+import com.fitness.backend.goal.GoalService;
 import com.fitness.backend.meal.dto.DailySummaryResponse;
 import com.fitness.backend.meal.dto.MealCreateRequest;
 import com.fitness.backend.meal.dto.MealItemRequest;
@@ -41,6 +42,9 @@ class MealServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private GoalService goalService;
 
     @InjectMocks
     private MealService mealService;

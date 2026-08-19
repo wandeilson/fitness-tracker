@@ -1,6 +1,7 @@
 package com.fitness.backend.goal.dto;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.math.BigDecimal;
 
 public record GoalResponse(
@@ -14,6 +15,8 @@ public record GoalResponse(
     BigDecimal carbsG,
     BigDecimal proteinG,
     BigDecimal fatG,
+    LocalDate validFrom,
+    LocalDate validUntil,
     Instant updatedAt
 ) {
 }

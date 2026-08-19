@@ -43,12 +43,20 @@ export interface MealItemRequest {
   grams: number;
 }
 
+export interface GoalSummary {
+  calories: number;
+  carbsG: number;
+  proteinG: number;
+  fatG: number;
+}
+
 export interface DailySummaryResponse {
   date: string;
   kcalTotal: number;
   carbsTotal: number;
   proteinTotal: number;
   fatTotal: number;
+  goal: GoalSummary | null;
 }
 
 export const MEAL_TYPE_LABELS: Record<MealType, string> = {

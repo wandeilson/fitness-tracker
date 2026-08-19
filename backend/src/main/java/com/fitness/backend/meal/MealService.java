@@ -2,7 +2,10 @@ package com.fitness.backend.meal;
 
 import com.fitness.backend.food.Food;
 import com.fitness.backend.food.FoodRepository;
+import com.fitness.backend.goal.GoalService;
+import com.fitness.backend.goal.dto.GoalResponse;
 import com.fitness.backend.meal.dto.DailySummaryResponse;
+import com.fitness.backend.meal.dto.GoalSummary;
 import com.fitness.backend.meal.dto.MealCreateRequest;
 import com.fitness.backend.meal.dto.MealItemRequest;
 import com.fitness.backend.meal.dto.MealItemResponse;
@@ -16,6 +19,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,17 +32,20 @@ public class MealService {
     private final MealItemRepository mealItemRepository;
     private final FoodRepository foodRepository;
     private final UserRepository userRepository;
+    private final GoalService goalService;
 
     public MealService(
         MealRepository mealRepository,
         MealItemRepository mealItemRepository,
         FoodRepository foodRepository,
-        UserRepository userRepository
+        UserRepository userRepository,
+        GoalService goalService
     ) {
         this.mealRepository = mealRepository;
         this.mealItemRepository = mealItemRepository;
         this.foodRepository = foodRepository;
         this.userRepository = userRepository;
+        this.goalService = goalService;
     }
 
     @Transactional
@@ -144,12 +151,17 @@ public class MealService {
             fatTotal = fatTotal.add(meal.fatTotal());
         }
 
+        GoalSummary goalSummary = goalService.getGoalForDate(email, date)
+            .map(g -> new GoalSummary(g.calories(), g.carbsG(), g.proteinG(), g.fatG()))
+            .orElse(null);
+
         return new DailySummaryResponse(
             date,
             scale2(kcalTotal),
             scale2(carbsTotal),
             scale2(proteinTotal),
-            scale2(fatTotal)
+            scale2(fatTotal),
+            goalSummary
         );
     }
 
