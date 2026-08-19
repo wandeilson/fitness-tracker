@@ -332,7 +332,6 @@ public class TacoFoodSeedRunner implements ApplicationRunner {
         }
 
         String number = normalized
-            .replace(".", "")
             .replace(",", ".")
             .replaceAll("[^0-9.-]", "");
 
