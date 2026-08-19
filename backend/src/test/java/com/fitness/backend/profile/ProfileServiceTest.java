@@ -82,6 +82,25 @@ class ProfileServiceTest {
     }
 
     @Test
+    void updateProfileShouldKeepFullNameWhenRequestNameIsNull() {
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+
+        ProfileRequest request = new ProfileRequest(
+            null,
+            31,
+            81.0,
+            179,
+            Sex.MALE,
+            ActivityLevel.LIGHTLY_ACTIVE
+        );
+
+        profileService.updateProfile("user@test.com", request);
+
+        assertEquals("User Test", user.getFullName());
+    }
+
+    @Test
     void updateProfileShouldKeepFullNameWhenRequestNameIsBlank() {
         when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);

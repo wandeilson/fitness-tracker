@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,7 +46,7 @@ class GoalServiceTest {
         user.setEmail("user@test.com");
         user.setFullName("User Test");
 
-        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
+        lenient().when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
     }
 
     @Test
@@ -179,6 +180,58 @@ class GoalServiceTest {
 
         assertNotNull(result);
         assertEquals(1500, result.get().calories());
+    }
+
+    @Test
+    void getGoalForDateShouldReturnEmptyWhenNoGoalExists() {
+        when(goalRepository.findActiveByUserIdAndDate(1L, LocalDate.of(2026, 1, 1))).thenReturn(Optional.empty());
+        when(goalRepository.findMostRecentClosedByUserId(1L)).thenReturn(Optional.empty());
+
+        Optional<GoalResponse> result = goalService.getGoalForDate("user@test.com", LocalDate.of(2026, 1, 1));
+
+        assertEquals(Optional.empty(), result);
+    }
+
+    @Test
+    void getGoalForDateShouldFallbackToMostRecentClosedGoal() {
+        Goal closed = buildGoal(1L, LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31));
+        closed.setCalories(1800);
+        when(goalRepository.findActiveByUserIdAndDate(1L, LocalDate.of(2026, 3, 15))).thenReturn(Optional.empty());
+        when(goalRepository.findMostRecentClosedByUserId(1L)).thenReturn(Optional.of(closed));
+
+        Optional<GoalResponse> result = goalService.getGoalForDate("user@test.com", LocalDate.of(2026, 3, 15));
+
+        assertNotNull(result);
+        assertEquals(1800, result.get().calories());
+    }
+
+    @Test
+    void upsertGoalShouldCreateNewGoalWhenTodayAlreadyHasGoalFromDifferentDate() {
+        Goal existingOpenGoal = buildGoal(1L, LocalDate.now().minusDays(5), null);
+        existingOpenGoal.setCalories(2200);
+        Goal todayGoal = buildGoal(2L, LocalDate.now(), null);
+        todayGoal.setCalories(1800);
+
+        when(goalRepository.findCurrentByUserId(1L)).thenReturn(Optional.of(existingOpenGoal));
+        when(goalRepository.findActiveByUserIdAndDate(1L, LocalDate.now())).thenReturn(Optional.of(todayGoal));
+        when(goalRepository.save(any(Goal.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        GoalResponse response = goalService.upsertGoal("user@test.com", new GoalRequest(2500, null, null, null));
+
+        assertEquals(2500, response.calories());
+        assertEquals(LocalDate.now(), response.validFrom());
+    }
+
+    @Test
+    void getGoalShouldThrowWhenUserNotFound() {
+        when(userRepository.findByEmail("other@test.com")).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> goalService.getGoal("other@test.com")
+        );
+
+        assertEquals("User not found", ex.getMessage());
     }
 
     private Goal buildGoal(Long id, LocalDate validFrom, LocalDate validUntil) {

@@ -68,6 +68,21 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
+    void shouldContinueWithoutAuthenticationWhenTokenCausesIllegalArgumentException() throws ServletException, IOException {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        request.addHeader("Authorization", "Bearer bad-token");
+
+        when(jwtService.extractUsername("bad-token")).thenThrow(new IllegalArgumentException("Bad token"));
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
     void shouldAuthenticateWhenTokenIsValid() throws ServletException, IOException {
         JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService);
         MockHttpServletRequest request = new MockHttpServletRequest();

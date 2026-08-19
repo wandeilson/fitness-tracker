@@ -24,6 +24,15 @@ class FoodServiceTest {
     private FoodService foodService;
 
     @Test
+    void listFoodsShouldReturnAllActiveFoodsWhenQueryIsNull() {
+        when(foodRepository.findByActiveTrueOrderByNameAsc()).thenReturn(List.of(food("Arroz")));
+
+        List<FoodResponse> response = foodService.listFoods(null);
+
+        assertEquals(1, response.size());
+    }
+
+    @Test
     void listFoodsShouldReturnAllActiveFoodsWhenQueryIsBlank() {
         when(foodRepository.findByActiveTrueOrderByNameAsc()).thenReturn(List.of(food("Arroz"), food("Feijao")));
 
