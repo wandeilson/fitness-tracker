@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export type Sex = 'MALE' | 'FEMALE';
 
@@ -27,7 +28,7 @@ export interface ProfileResponse extends ProfilePayload {
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/profile';
+  private readonly apiUrl = `${environment.apiUrl}/api/profile`;
 
   getProfile(): Observable<ProfileResponse> {
     return this.http.get<ProfileResponse>(this.apiUrl);

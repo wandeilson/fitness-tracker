@@ -7,11 +7,12 @@ import {
   MealItemRequest,
   MealResponse,
 } from '../models/meal.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class MealService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/meals';
+  private readonly apiUrl = `${environment.apiUrl}/api/meals`;
 
   getMeals(date: string): Observable<MealResponse[]> {
     return this.http.get<MealResponse[]>(this.apiUrl, { params: { date } });
